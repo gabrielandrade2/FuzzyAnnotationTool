@@ -5,6 +5,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
@@ -14,7 +15,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -28,6 +34,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
 import javax.swing.text.NumberFormatter;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -36,7 +45,15 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public class Main {
 
-    public record Annotation(int start, String tag) {}
+    private static Stack<Annotation>[] storedAnnotations;
+
+    public record Annotation(int start, String tag) implements Comparable<Annotation> {
+
+        @Override
+        public int compareTo(Annotation o) {
+            return Integer.compare(start, o.start);
+        }
+    }
 
     public static class TextAreaExample {
 
@@ -45,17 +62,22 @@ public class Main {
         private final JButton next;
         private final JButton prev;
         private String[] documents = null;
+        private Stack<Annotation> annotations;
         private int i = 0;
-        private Stack<Annotation> annotations = new Stack<>();
+        private Highlighter highlighter;
+        private GradientHighlighter painter;
 
         TextAreaExample(String file) {
             documents = readXML(file);
+            storedAnnotations = new Stack[documents.length];
             JFrame f = new JFrame();
-            area = new JTextArea(documents[i]);
+            area = new JTextArea();
+            area.setHighlighter(new DefaultHighlighter());
             area.setEditable(false);
             area.setBounds(10, 10, 1000, 600);
             area.setLineWrap(true);
-            area.setWrapStyleWord(true);
+            area.setWrapStyleWord(false);
+            area.setSelectionColor(null);
 
             JPanel panel1 = new JPanel();
             FlowLayout layout = new FlowLayout();
@@ -100,7 +122,7 @@ public class Main {
             });
             JButton reset = new JButton("Reset");
             reset.addActionListener(e -> {
-                while (!annotations.isEmpty()) {
+                while (storedAnnotations[i] != null && !storedAnnotations[i].isEmpty()) {
                     undo();
                 }
             });
@@ -123,18 +145,19 @@ public class Main {
             panel = new JPanel(new FlowLayout());
             JButton save = new JButton("Save");
             save.addActionListener(e -> {
-                JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+                JFileChooser jfc = new JFileChooser(
+                        FileSystemView.getFileSystemView().getHomeDirectory());
                 jfc.setDialogTitle("Specify a file to save");
                 int returnValue = jfc.showSaveDialog(f);
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = jfc.getSelectedFile();
                     System.out.println(selectedFile.getAbsolutePath());
-                    saveXML(selectedFile.getAbsolutePath(), documents);
+                    saveXML(selectedFile.getAbsolutePath(), documents, storedAnnotations);
                 }
 
             });
             panel.add(save);
-            panel2.add(panel , BorderLayout.SOUTH);
+            panel2.add(panel, BorderLayout.SOUTH);
 
             f.setSize(1000, 600);
             f.setLayout(new BorderLayout());
@@ -155,9 +178,18 @@ public class Main {
                         }
 
                         String tag = (String) comboBox.getSelectedItem();
-                        area.setText(text.substring(0, start) + "<" + tag + " />" +
-                                text.substring(start));
+//                        area.setText(text.substring(0, start) + "<" + tag + " />" +
+//                                text.substring(start));
+                        area.setHighlighter(new DefaultHighlighter());
+                        area.setSelectionColor(Color.white);
+                        highlighter = area.getHighlighter();
+                        highlighter.removeAllHighlights();
+                        painter =
+                                new GradientHighlighter(new Color(51, 153, 255, 128));
+
                         annotations.push(new Annotation(start, tag));
+
+                        annotateAll();
                     }
                 }
             });
@@ -178,13 +210,13 @@ public class Main {
                     documents[i] = area.getText();
                 }
             });
+            changeText(i);
         }
 
         private void undo() {
             if (!annotations.isEmpty()) {
-                Annotation annotation = annotations.pop();
-                area.replaceRange("", annotation.start,
-                        annotation.start + annotation.tag.length() + 4);
+                annotations.pop();
+                annotateAll();
             }
         }
 
@@ -193,9 +225,15 @@ public class Main {
                 return;
             }
             i = newDoc;
-            annotations.clear();
+            if (storedAnnotations.length <= i || storedAnnotations[i] == null) {
+                storedAnnotations[i] = new Stack<>();
+            }
+            annotations = storedAnnotations[i];
             area.setText(documents[i]);
             textField.setText(String.valueOf(i + 1));
+
+            annotateAll();
+
             if (i == 0) {
                 prev.setEnabled(false);
             } else {
@@ -208,6 +246,34 @@ public class Main {
                 next.setEnabled(true);
             }
         }
+
+        private void annotateAll() {
+            highlighter.removeAllHighlights();
+            try {
+                for (Annotation a : annotations) {
+                    int start = Math.max(0, a.start - 10);
+                    int offseta = area.getText().substring(start, a.start)
+                            .indexOf("\n");
+                    if (offseta == -1) {
+                        offseta = 0;
+                    }
+
+                    int end = Math.min(area.getText().length(), a.start + 10);
+                    int offsetb = area.getText().substring(a.start, end)
+                            .indexOf("\n");
+                    if (offsetb == -1) {
+                        offsetb = 10;
+                    }
+
+                    highlighter.addHighlight(Math.max(a.start - 10 + offseta, 0),
+                            Math.min(a.start + offsetb, area.getText().length()-1),
+                            painter);
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
 
         private static String[] readXML(String path) {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -235,24 +301,45 @@ public class Main {
             return null;
         }
 
-        private static void saveXML(String path, String[] documents){
+        private static void saveXML(String path, String[] documents,
+                Stack<Annotation>[] annotations) {
             File file = new File(path);
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(file));
                 writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
                 writer.write("<articles>\n");
-                for (String document : documents) {
+                for (int i = 0; i < documents.length; i++) {
+                    String document = documents[i];
+                    Stack<Annotation> ann = annotations[i];
                     writer.write("<article>\n");
-                    writer.write(document + "\n");
+                    writer.write(convertAnnotationsIntoTags(document, ann));
                     writer.write("</article>\n");
                 }
 
-
+                writer.write("</articles>");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
         }
+    }
+
+    private static String convertAnnotationsIntoTags(String text, Stack<Annotation> annotations) {
+        if (annotations == null || annotations.isEmpty()) {
+            return text;
+        }
+
+        String taggedText = new String(text);
+        List<Annotation> sortedAnnotations = annotations.stream().sorted()
+                .collect(Collectors.toList());
+        int offset = 0;
+        for (Annotation a : sortedAnnotations) {
+            String tag = "<" + a.tag + " />";
+            taggedText = taggedText.substring(0, a.start + offset) + tag +
+                    taggedText.substring(a.start + offset);
+            offset += tag.length();
+        }
+        return taggedText;
     }
 
 
