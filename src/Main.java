@@ -31,6 +31,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.DefaultHighlighter;
@@ -141,6 +142,9 @@ public class Main {
                 JFileChooser jfc = new JFileChooser(
                         FileSystemView.getFileSystemView().getHomeDirectory());
                 jfc.setDialogTitle("Specify a file to save");
+                jfc.setSelectedFile(new File("annotation.xml"));
+                jfc.setAcceptAllFileFilterUsed(false);
+                jfc.setFileFilter(new FileNameExtensionFilter("XML file","xml"));
                 int returnValue = jfc.showSaveDialog(f);
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = jfc.getSelectedFile();
@@ -369,7 +373,10 @@ public class Main {
 
     public static String fileChooser() {
         JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-        jfc.setFileFilter(new FileNameExtensionFilter("Text files", "txt", "xml"));
+        FileFilter filter = new FileNameExtensionFilter("Text files", "txt", "xml");
+        jfc.addChoosableFileFilter(filter);
+        jfc.setFileFilter(filter);
+        jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
         jfc.setAcceptAllFileFilterUsed(false);
         int returnValue = jfc.showOpenDialog(null);
 
