@@ -8,8 +8,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -25,7 +23,6 @@ public class FileSelectionUI {
 
     private final JFrame frame;
     private ButtonGroup buttonGroup;
-    private List<JRadioButton> buttons = new ArrayList<>();
 
     public FileSelectionUI() {
         frame = new JFrame("File Selection");
@@ -53,6 +50,7 @@ public class FileSelectionUI {
             panel.add(checkBox);
             buttonGroup.add(checkBox);
         }
+        buttonGroup.setSelected(buttonGroup.getElements().nextElement().getModel(), true);
     }
 
     private void buttonPressed(ActionEvent e) {

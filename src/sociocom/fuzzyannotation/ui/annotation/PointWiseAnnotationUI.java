@@ -15,7 +15,7 @@ import javax.swing.text.Highlighter;
 public class PointWiseAnnotationUI extends BaseAnnotationUI {
 
     public PointWiseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
-        super(documents, storedAnnotations);
+        super(documents, storedAnnotations, "Point-wise Annotation");
     }
 
     @Override

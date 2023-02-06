@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
@@ -14,7 +15,7 @@ import javax.swing.text.Highlighter;
 public class HighlightAnnotationUI extends BaseAnnotationUI {
 
     public HighlightAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
-        super(documents, storedAnnotations);
+        super(documents, storedAnnotations, "Highlight Annotation");
     }
 
     @Override
@@ -60,8 +61,27 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
     }
 
     @Override
-    protected String convertAnnotationsIntoTags(String document, List<Annotation> annotations) {
-        return null;
+    protected String convertAnnotationsIntoTags(String text, List<Annotation> annotations) {
+        if (annotations == null || annotations.isEmpty()) {
+            return text;
+        }
+
+        String taggedText = new String(text);
+        List<Annotation> sortedAnnotations = annotations.stream().sorted()
+                .collect(Collectors.toList());
+        int offset = 0;
+        for (Annotation a : sortedAnnotations) {
+            String startTag = "<" + a.tag() + ">";
+            String endTag = "</" + a.tag() + ">";
+            StringBuilder sb = new StringBuilder();
+            sb.append(taggedText.substring(0, a.start() + offset));
+            sb.append(startTag);
+            sb.append(text.substring(a.start() + offset, a.end() + offset));
+            sb.append(endTag);
+            sb.append(taggedText.substring(a.end() + offset));
+            offset += startTag.length() + endTag.length();
+        }
+        return taggedText;
     }
 
     private class MouseEventHandler extends MouseAdapter {

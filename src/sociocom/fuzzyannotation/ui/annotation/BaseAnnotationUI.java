@@ -56,12 +56,13 @@ public abstract class BaseAnnotationUI {
     protected GradientHighlighter painter;
     protected final Random random = new Random();
 
-    public BaseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
+    public BaseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations,
+            String title) {
         this.documents = documents;
         this.storedAnnotations = storedAnnotations;
 
         // Create UI
-        frame = new JFrame();
+        frame = new JFrame(title);
 
         // Text Area
         textArea = new JTextArea();

@@ -21,7 +21,6 @@ public class Annotation implements Comparable<Annotation> {
         this.tag = tag;
     }
 
-
     public int start() {
         return start;
     }
