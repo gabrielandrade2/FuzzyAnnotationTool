@@ -16,6 +16,7 @@ import java.io.File;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import javax.swing.JButton;
@@ -60,6 +61,7 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
     // Highlighting
     private final Highlighter highlighter;
     private final GradientHighlighter painter;
+    private final Random random = new Random();
 
     public PointWiseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
         this.documents = documents;
@@ -186,24 +188,30 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
     private void annotateAll() {
         highlighter.removeAllHighlights();
         try {
+
             for (Annotation a : annotations) {
-                int start = Math.max(0, a.start() - 10);
-                int offseta = textArea.getText().substring(start, a.start())
-                        .indexOf("\n");
-                if (offseta == -1) {
-                    offseta = 0;
+                if (a.getStartSpan() == -1 || a.getEndSpan() == -1) {
+                    int span = random.nextInt(10 - 3) + 3;
+                    int start = Math.max(0, a.start() - span);
+                    int offseta = textArea.getText().substring(start, a.start())
+                            .indexOf("\n");
+                    if (offseta == -1) {
+                        offseta = 0;
+                    }
+
+                    int end = Math.min(textArea.getText().length(), a.start() + span);
+                    int offsetb = textArea.getText().substring(a.start(), end)
+                            .indexOf("\n");
+                    if (offsetb == -1) {
+                        offsetb = span;
+                    }
+
+                    a.setSpan(Math.max(a.start() - span + offseta, 0),
+                            Math.min(a.start() + offsetb, textArea.getText().length() - 1));
                 }
 
-                int end = Math.min(textArea.getText().length(), a.start() + 10);
-                int offsetb = textArea.getText().substring(a.start(), end)
-                        .indexOf("\n");
-                if (offsetb == -1) {
-                    offsetb = 10;
-                }
+                highlighter.addHighlight(a.getStartSpan(), a.getEndSpan(), painter);
 
-                highlighter.addHighlight(Math.max(a.start() - 10 + offseta, 0),
-                        Math.min(a.start() + offsetb, textArea.getText().length() - 1),
-                        painter);
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);

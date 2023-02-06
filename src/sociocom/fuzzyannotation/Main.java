@@ -1,5 +1,6 @@
 package sociocom.fuzzyannotation;
 
+import sociocom.fuzzyannotation.ui.FileSelectionUI;
 import sociocom.fuzzyannotation.ui.PointWiseAnnotationUI;
 import sociocom.fuzzyannotation.utils.XMLUtils;
 
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
@@ -18,17 +18,19 @@ import javax.swing.filechooser.FileSystemView;
 public class Main {
 
     public static void main(String[] args) {
-        Path file = fileChooser();
-        if (file == null) {
-            JOptionPane.showMessageDialog(null, "No file selected");
-            return;
-        }
+        new FileSelectionUI();
+    }
 
+
+    public static void openWindow(WindowType type, Path file) {
+        loadDocument(file);
+    }
+
+    private static void loadDocument(Path file) {
         //Load documents
         List<String> documents = XMLUtils.readXML(file);
         List<List<Annotation>> storedAnnotations = convertTagsIntoAnnotations(documents);
         removeAnnotations(documents);
-
         new PointWiseAnnotationUI(documents, storedAnnotations);
     }
 
