@@ -1,3 +1,5 @@
+package sociocom.fuzzyannotation;
+
 public record Annotation(int start, String tag) implements Comparable<Annotation> {
 
     @Override

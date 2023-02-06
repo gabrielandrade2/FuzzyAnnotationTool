@@ -1,3 +1,8 @@
+package sociocom.fuzzyannotation;
+
+import sociocom.fuzzyannotation.ui.PointWiseAnnotationUI;
+import sociocom.fuzzyannotation.utils.XMLUtils;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;

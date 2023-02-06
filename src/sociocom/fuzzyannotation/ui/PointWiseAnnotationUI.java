@@ -1,3 +1,9 @@
+package sociocom.fuzzyannotation.ui;
+
+import sociocom.fuzzyannotation.Annotation;
+import sociocom.fuzzyannotation.GradientHighlighter;
+import sociocom.fuzzyannotation.utils.XMLUtils;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -55,7 +61,7 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
     private final Highlighter highlighter;
     private final GradientHighlighter painter;
 
-    PointWiseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
+    public PointWiseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
         this.documents = documents;
         this.storedAnnotations = storedAnnotations;
 
