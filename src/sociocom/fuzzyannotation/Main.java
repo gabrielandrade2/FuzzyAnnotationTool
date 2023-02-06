@@ -1,7 +1,8 @@
 package sociocom.fuzzyannotation;
 
 import sociocom.fuzzyannotation.ui.FileSelectionUI;
-import sociocom.fuzzyannotation.ui.PointWiseAnnotationUI;
+import sociocom.fuzzyannotation.ui.annotation.HighlightAnnotationUI;
+import sociocom.fuzzyannotation.ui.annotation.PointWiseAnnotationUI;
 import sociocom.fuzzyannotation.utils.XMLUtils;
 
 import java.io.File;
@@ -21,17 +22,24 @@ public class Main {
         new FileSelectionUI();
     }
 
-
     public static void openWindow(WindowType type, Path file) {
-        loadDocument(file);
+        loadDocument(type, file);
     }
 
-    private static void loadDocument(Path file) {
+    private static void loadDocument(WindowType type, Path file) {
         //Load documents
         List<String> documents = XMLUtils.readXML(file);
         List<List<Annotation>> storedAnnotations = convertTagsIntoAnnotations(documents);
         removeAnnotations(documents);
-        new PointWiseAnnotationUI(documents, storedAnnotations);
+        switch (type) {
+            case PointWiseAnnotationUI:
+                new PointWiseAnnotationUI(documents, storedAnnotations);
+                break;
+            case HighlightAnnotationUI:
+                new HighlightAnnotationUI(documents, storedAnnotations);
+                break;
+
+        }
     }
 
     public static Path fileChooser() {

@@ -1,24 +1,19 @@
-package sociocom.fuzzyannotation.ui;
+package sociocom.fuzzyannotation.ui.annotation;
 
 import sociocom.fuzzyannotation.Annotation;
 import sociocom.fuzzyannotation.GradientHighlighter;
 import sociocom.fuzzyannotation.utils.XMLUtils;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Stack;
-import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -29,41 +24,39 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import javax.swing.text.NumberFormatter;
 
-public class PointWiseAnnotationUI extends BaseAnnotationUI {
+public abstract class BaseAnnotationUI {
 
     private static final String[] tagOptions = {"C"};
 
     // UI elements
-    private final JFrame frame;
-    private final JTextField docNumInputField;
-    private final JTextArea textArea;
-    private final JButton nextButton;
-    private final JButton prevButton;
-    private final JButton undoButton;
-    private final JComboBox<String> tagComboBox;
+    protected final JFrame frame;
+    protected final JTextField docNumInputField;
+    protected final JTextArea textArea;
+    protected final JButton nextButton;
+    protected final JButton prevButton;
+    protected final JButton undoButton;
+    protected final JComboBox<String> tagComboBox;
 
     // Annotation data
-    private List<List<Annotation>> storedAnnotations;
-    private List<String> documents;
-    private List<Annotation> annotations;
-    private Stack<Annotation> undoStack = new Stack<>();
-    private int documentNumber = 0;
+    protected List<List<Annotation>> storedAnnotations;
+    protected List<String> documents;
+    protected List<Annotation> annotations;
+    protected Stack<Annotation> undoStack = new Stack<>();
+    protected int documentNumber = 0;
 
     // Highlighting
-    private final Highlighter highlighter;
-    private final GradientHighlighter painter;
-    private final Random random = new Random();
+    protected Highlighter highlighter;
+    protected GradientHighlighter painter;
+    protected final Random random = new Random();
 
-    public PointWiseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
+    public BaseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
         this.documents = documents;
         this.storedAnnotations = storedAnnotations;
 
@@ -76,11 +69,6 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
         textArea.setBounds(10, 10, 1000, 600);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(false);
-        textArea.setSelectionColor(null);
-        highlighter = new DefaultHighlighter();
-        painter = new GradientHighlighter(new Color(51, 153, 255, 128));
-        textArea.setHighlighter(highlighter);
-        textArea.addMouseListener(new MouseEventHandler());
         textArea.getDocument().addDocumentListener(new DocumentUpdater());
 
         // Create Upper panel
@@ -130,9 +118,11 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
         lowerPanel.add(tempPanel, BorderLayout.NORTH);
         tempPanel = new JPanel(new FlowLayout());
         JButton save = new JButton("Save");
-        save.addActionListener(new SaveAction());
+        save.addActionListener(this::saveAction);
         tempPanel.add(save);
         lowerPanel.add(tempPanel, BorderLayout.SOUTH);
+
+        configureElements();
 
         // Add elements to Frame
         frame.setSize(1000, 600);
@@ -145,6 +135,9 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
         // Select first document
         changeText(documentNumber);
     }
+
+    // Override this method to configure UI elements
+    protected abstract void configureElements();
 
     private void undo() {
         if (!undoStack.isEmpty()) {
@@ -185,40 +178,24 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
         }
     }
 
-    private void annotateAll() {
-        highlighter.removeAllHighlights();
-        try {
+    protected abstract void annotateAll();
 
-            for (Annotation a : annotations) {
-                if (a.getStartSpan() == -1 || a.getEndSpan() == -1) {
-                    int span = random.nextInt(10 - 3) + 3;
-                    int start = Math.max(0, a.start() - span);
-                    int offseta = textArea.getText().substring(start, a.start())
-                            .indexOf("\n");
-                    if (offseta == -1) {
-                        offseta = 0;
-                    }
-
-                    int end = Math.min(textArea.getText().length(), a.start() + span);
-                    int offsetb = textArea.getText().substring(a.start(), end)
-                            .indexOf("\n");
-                    if (offsetb == -1) {
-                        offsetb = span;
-                    }
-
-                    a.setSpan(Math.max(a.start() - span + offseta, 0),
-                            Math.min(a.start() + offsetb, textArea.getText().length() - 1));
-                }
-
-                highlighter.addHighlight(a.getStartSpan(), a.getEndSpan(), painter);
-
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+    private void saveAction(ActionEvent e) {
+        JFileChooser jfc = new JFileChooser(
+                FileSystemView.getFileSystemView().getHomeDirectory());
+        jfc.setDialogTitle("Specify a file to save");
+        jfc.setSelectedFile(new File("annotation.xml"));
+        jfc.setAcceptAllFileFilterUsed(false);
+        jfc.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));
+        int returnValue = jfc.showSaveDialog(frame);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = jfc.getSelectedFile();
+            System.out.println(selectedFile.getAbsolutePath());
+            save(selectedFile.getAbsolutePath(), documents, storedAnnotations);
         }
     }
 
-    private static void save(String path, List<String> documents,
+    private void save(String path, List<String> documents,
             List<List<Annotation>> annotations) {
         List<String> taggedDocuments = new ArrayList<>();
         for (int i = 0; i < documents.size(); i++) {
@@ -230,66 +207,8 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
         new JOptionPane().showMessageDialog(null, "Saved to " + path);
     }
 
-    private static String convertAnnotationsIntoTags(String text, List<Annotation> annotations) {
-        if (annotations == null || annotations.isEmpty()) {
-            return text;
-        }
-
-        String taggedText = new String(text);
-        List<Annotation> sortedAnnotations = annotations.stream().sorted()
-                .collect(Collectors.toList());
-        int offset = 0;
-        for (Annotation a : sortedAnnotations) {
-            String tag = "<" + a.tag() + " />";
-            taggedText = taggedText.substring(0, a.start() + offset) + tag +
-                    taggedText.substring(a.start() + offset);
-            offset += tag.length();
-        }
-        return taggedText;
-    }
-
-    private class MouseEventHandler extends MouseAdapter {
-
-        public void mousePressed(MouseEvent e) {
-            if (SwingUtilities.isLeftMouseButton(e)) {
-                addAnnotation();
-            } else if (SwingUtilities.isRightMouseButton(e)) {
-                removeAnnotation();
-            }
-        }
-
-        private void addAnnotation() {
-            int start = textArea.getSelectionStart();
-            String text = textArea.getText();
-
-            if (start == text.length()) {
-                return;
-            }
-
-            String tag = (String) tagComboBox.getSelectedItem();
-            textArea.setSelectionColor(Color.white);
-            highlighter.removeAllHighlights();
-
-            Annotation annotation = new Annotation(start, tag);
-            annotations.add(annotation);
-            undoStack.push(annotation);
-            undoButton.setEnabled(true);
-
-            annotateAll();
-        }
-
-        private void removeAnnotation() {
-            int start = textArea.getSelectionStart();
-            Highlighter.Highlight[] highlights = textArea.getHighlighter()
-                    .getHighlights();
-            for (Highlighter.Highlight highlight : highlights) {
-                if (highlight.getStartOffset() <= start &&
-                        highlight.getEndOffset() >= start) {
-                    break;
-                }
-            }
-        }
-    }
+    protected abstract String convertAnnotationsIntoTags(String document,
+            List<Annotation> annotations);
 
     private class DocumentUpdater implements DocumentListener {
 
@@ -306,25 +225,6 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
         @Override
         public void changedUpdate(DocumentEvent arg0) {
             documents.set(documentNumber, textArea.getText());
-        }
-    }
-
-    private class SaveAction implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            JFileChooser jfc = new JFileChooser(
-                    FileSystemView.getFileSystemView().getHomeDirectory());
-            jfc.setDialogTitle("Specify a file to save");
-            jfc.setSelectedFile(new File("annotation.xml"));
-            jfc.setAcceptAllFileFilterUsed(false);
-            jfc.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));
-            int returnValue = jfc.showSaveDialog(frame);
-            if (returnValue == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = jfc.getSelectedFile();
-                System.out.println(selectedFile.getAbsolutePath());
-                save(selectedFile.getAbsolutePath(), documents, storedAnnotations);
-            }
         }
     }
 }

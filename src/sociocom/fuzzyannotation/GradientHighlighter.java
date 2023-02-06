@@ -77,11 +77,14 @@ public class GradientHighlighter extends DefaultHighlighter.DefaultHighlightPain
 
             Graphics2D g2d = (Graphics2D) g;
             GradientPaint gradient;
-            if (c.getFontMetrics(c.getFont()).getMaxAdvance() + r.x + r.width >= c.getWidth()) {
+            if (c.getFontMetrics(c.getFont()).charWidth(c.getText().charAt(offs1 + 1)) + r.x +
+                    r.width > c.getWidth()) {
                 gradient = new GradientPaint(r.x, r.y, transparent, r.x + r.width, r.y,
                         color, false);
 
-            } else if (r.x - c.getFontMetrics(c.getFont()).getMaxAdvance() <= 0) {
+            } else if (
+                    r.x - c.getFontMetrics(c.getFont()).charWidth(c.getText().charAt(offs0 - 1)) <
+                            0) {
                 gradient = new GradientPaint(r.x, r.y, color, r.x + r.width, r.y,
                         transparent, false);
             } else {

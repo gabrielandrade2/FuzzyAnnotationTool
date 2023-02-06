@@ -8,6 +8,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -22,6 +24,8 @@ import javax.swing.filechooser.FileSystemView;
 public class FileSelectionUI {
 
     private final JFrame frame;
+    private ButtonGroup buttonGroup;
+    private List<JRadioButton> buttons = new ArrayList<>();
 
     public FileSelectionUI() {
         frame = new JFrame("File Selection");
@@ -42,11 +46,12 @@ public class FileSelectionUI {
     }
 
     private void addRadioButtons(JPanel panel) {
-        ButtonGroup group = new ButtonGroup();
+        buttonGroup = new ButtonGroup();
         for (WindowType type : WindowType.values()) {
-            JRadioButton checkBox = new JRadioButton(type.toString());
+            JRadioButton checkBox = new JRadioButton(type.getName());
+            checkBox.setActionCommand(type.toString());
             panel.add(checkBox);
-            group.add(checkBox);
+            buttonGroup.add(checkBox);
         }
     }
 
@@ -57,7 +62,9 @@ public class FileSelectionUI {
             return;
         }
         frame.dispose();
-        Main.openWindow(WindowType.PointWiseAnnotationUI, file);
+
+        String command = buttonGroup.getSelection().getActionCommand();
+        Main.openWindow(WindowType.valueOf(command), file);
     }
 
     private static Path fileChooser() {
