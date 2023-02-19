@@ -7,9 +7,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -24,7 +26,7 @@ public class OptionsPanel extends JFrame {
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
         JLabel title = new JLabel("Options");
-        title.setFont(new Font("Serif", Font.BOLD, 14));
+        title.setFont(title.getFont().deriveFont(Font.BOLD, 18));
 
         JLabel fuzzyWeightLabel = new JLabel("Fuzzy Weight");
         JSlider fuzzyWeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 20,
@@ -43,19 +45,30 @@ public class OptionsPanel extends JFrame {
 
         JLabel highlighterColorLabel = new JLabel("Highlighter Color");
         JComboBox<String> highlighterColorComboBox = new JComboBox<>(
-                GradientHighlighter.COLORS.keySet().toArray(new String[0]));
+                GradientHighlighter.COLORS.toArray(new String[0]));
+        highlighterColorComboBox.setSelectedIndex(annotationUI.getPainter().getColorIndex());
         highlighterColorComboBox.addActionListener(this::setHighlighterColor);
 
         JLabel fuzzinessLabel = new JLabel("Fuzziness");
         JSlider fuzzinessSlider = new JSlider(JSlider.HORIZONTAL, -128, 0,
-                0);
+                annotationUI.getFuzziness());
         fuzzinessSlider.addChangeListener(this::setFuzziness);
 
         setLayout(new BorderLayout());
         JPanel tempPanel = new JPanel();
         tempPanel.setLayout(new BorderLayout());
         tempPanel.add(title, BorderLayout.CENTER);
+        tempPanel.add(new JLabel(" "), BorderLayout.SOUTH);
         add(tempPanel, BorderLayout.NORTH);
+
+        JButton importPrefs = new JButton("Import Preferences");
+        importPrefs.addActionListener(actionEvent -> {
+            JOptionPane.showMessageDialog(null, "Not implemented yet");
+        });
+        JButton exportPrefs = new JButton("Export Preferences");
+        exportPrefs.addActionListener(actionEvent -> {
+            JOptionPane.showMessageDialog(null, "Not implemented yet");
+        });
 
         if (annotationUI instanceof HighlightAnnotationUI) {
             highlighterMinSpanLabel.setEnabled(false);
@@ -65,7 +78,7 @@ public class OptionsPanel extends JFrame {
         }
 
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(5, 2));
+        centerPanel.setLayout(new GridLayout(6, 2));
         centerPanel.add(highlighterColorLabel);
         centerPanel.add(highlighterColorComboBox);
         centerPanel.add(fuzzinessLabel);
@@ -76,9 +89,22 @@ public class OptionsPanel extends JFrame {
         centerPanel.add(highlighterMinSpanSlider);
         centerPanel.add(highlighterMaxSpanLabel);
         centerPanel.add(highlighterMaxSpanSlider);
+
         add(centerPanel, BorderLayout.CENTER);
 
-        setSize(new Dimension(350, 180));
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BorderLayout());
+        JButton close = new JButton("Close");
+        close.addActionListener(actionEvent -> {
+            setVisible(false);
+            dispose();
+        });
+        bottomPanel.add(close, BorderLayout.EAST);
+        bottomPanel.add(importPrefs, BorderLayout.WEST);
+        bottomPanel.add(exportPrefs, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        setSize(new Dimension(400, 210));
         setLocationRelativeTo(null);
         setVisible(true);
         setResizable(false);
@@ -119,6 +145,6 @@ public class OptionsPanel extends JFrame {
     private void setHighlighterColor(ActionEvent actionEvent) {
         JComboBox<String> source = (JComboBox<String>) actionEvent.getSource();
         String color = (String) source.getSelectedItem();
-        annotationUI.setHighlighterColor(GradientHighlighter.COLORS.get(color));
+        annotationUI.setHighlighterColor(color);
     }
 }

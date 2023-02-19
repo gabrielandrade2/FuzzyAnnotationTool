@@ -6,9 +6,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.JTextComponent;
@@ -18,18 +19,19 @@ import javax.swing.text.View;
 
 public class GradientHighlighter extends DefaultHighlighter.DefaultHighlightPainter {
 
-    public static final Map<String, Color> COLORS = new LinkedHashMap<>();
+    private static final Map<String, Color> COLORSMAP = new LinkedHashMap<>();
 
     static {
-        COLORS.put("Blue", new Color(51, 153, 255, 128));
-        COLORS.put("Red", new Color(255, 51, 51, 128));
-        COLORS.put("Green", new Color(51, 255, 51, 128));
-        COLORS.put("Yellow", new Color(255, 255, 51, 128));
-        COLORS.put("Orange", new Color(255, 153, 51, 128));
-        COLORS.put("Purple", new Color(153, 51, 255, 128));
+        COLORSMAP.put("Blue", new Color(51, 153, 255, 128));
+        COLORSMAP.put("Red", new Color(255, 51, 51, 128));
+        COLORSMAP.put("Green", new Color(51, 255, 51, 128));
+        COLORSMAP.put("Yellow", new Color(255, 255, 51, 128));
+        COLORSMAP.put("Orange", new Color(255, 153, 51, 128));
+        COLORSMAP.put("Purple", new Color(153, 51, 255, 128));
     }
 
-    private Iterator<Color> colorIterator;
+    public static final List<String> COLORS = COLORSMAP.keySet().stream()
+            .collect(Collectors.toList());
 
     private Color color;
     private int fuzziness = 0;
@@ -54,17 +56,20 @@ public class GradientHighlighter extends DefaultHighlighter.DefaultHighlightPain
         return color;
     }
 
+    public int getColorIndex() {
+        return COLORS.indexOf(
+                COLORS.stream().filter(c -> COLORSMAP.get(c).equals(color)).findFirst().get());
+    }
+
     public void setColor(Color color) {
         this.color = color;
     }
 
-    public String getColorName() {
-        for (Map.Entry<String, Color> entry : COLORS.entrySet()) {
-            if (entry.getValue().equals(color)) {
-                return entry.getKey();
-            }
+    public void setColor(String color) {
+        try {
+            this.color = COLORSMAP.get(color);
+        } catch (Exception ignored) {
         }
-        return null;
     }
 
     @Override
@@ -72,7 +77,7 @@ public class GradientHighlighter extends DefaultHighlighter.DefaultHighlightPain
             Shape bounds, JTextComponent c, View view) {
         Color color = getColor();
         if (color == null) {
-            color = COLORS.get("Blue");
+            color = COLORSMAP.get("Blue");
         }
 
         Rectangle r;
@@ -140,6 +145,10 @@ public class GradientHighlighter extends DefaultHighlighter.DefaultHighlightPain
 
     public void setFuzziness(int fuzz) {
         this.fuzziness = fuzz;
+    }
+
+    public int getFuzziness() {
+        return fuzziness;
     }
 //
 //    private Color nextColor() {

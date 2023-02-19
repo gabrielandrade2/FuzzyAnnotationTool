@@ -5,7 +5,6 @@ import sociocom.fuzzyannotation.ui.GradientHighlighter;
 import sociocom.fuzzyannotation.utils.XMLUtils;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Stack;
+import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -44,6 +44,7 @@ public abstract class BaseAnnotationUI {
     protected final JButton prevButton;
     protected final JButton undoButton;
     protected final JComboBox<String> tagComboBox;
+    private final Preferences preferences;
 
     // Annotation data
     protected List<List<Annotation>> storedAnnotations;
@@ -54,9 +55,14 @@ public abstract class BaseAnnotationUI {
 
     // Highlighting
     protected Highlighter highlighter;
+
+    public GradientHighlighter getPainter() {
+        return painter;
+    }
+
     protected GradientHighlighter painter;
     protected final Random random = new Random();
-    private int fuzzySpan = 10;
+    private int fuzzyWeight = 10;
     private int minHighlightSpan = 3;
     private int maxHighlightSpan = 10;
 
@@ -67,6 +73,8 @@ public abstract class BaseAnnotationUI {
             String title) {
         this.documents = documents;
         this.storedAnnotations = storedAnnotations;
+
+        preferences = Preferences.userRoot().node(this.getClass().getName());
 
         // Create UI
         frame = new JFrame(title);
@@ -152,12 +160,23 @@ public abstract class BaseAnnotationUI {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        // load Preferences
+        loadPreferences();
+
         // Select first document
         changeText(documentNumber);
     }
 
     // Override this method to configure UI elements
     protected abstract void configureElements();
+
+    private void loadPreferences() {
+        fuzzyWeight = preferences.getInt("fuzzyWeight", fuzzyWeight);
+        minHighlightSpan = preferences.getInt("minHighlightSpan", minHighlightSpan);
+        maxHighlightSpan = preferences.getInt("maxHighlightSpan", maxHighlightSpan);
+        painter.setFuzziness(preferences.getInt("fuzziness", 0));
+        painter.setColor(preferences.get("color", "Blue"));
+    }
 
     private void undo() {
         if (!undoStack.isEmpty()) {
@@ -185,49 +204,40 @@ public abstract class BaseAnnotationUI {
 
         annotateAll();
 
-        if (documentNumber == 0) {
-            prevButton.setEnabled(false);
-        } else {
-            prevButton.setEnabled(true);
-        }
-
-        if (documentNumber == documents.size() - 1) {
-            nextButton.setEnabled(false);
-        } else {
-            nextButton.setEnabled(true);
-        }
+        prevButton.setEnabled(documentNumber != 0);
+        nextButton.setEnabled(documentNumber != documents.size() - 1);
     }
 
     public abstract void annotateAll();
 
     public int getFuzzyWeight() {
-        return this.fuzzySpan;
+        return this.fuzzyWeight;
     }
 
-    public void setFuzzyWeight(int fuzzySpan) {
-        updateAnnotationSpan(fuzzySpan - this.fuzzySpan);
-        this.fuzzySpan = fuzzySpan;
+    public void setFuzzyWeight(int fuzzyWeight) {
+        updateAnnotationSpan(fuzzyWeight - this.fuzzyWeight);
+        this.fuzzyWeight = fuzzyWeight;
+        preferences.putInt("fuzzyWeight", fuzzyWeight);
         annotateAll();
     }
 
     public int getMinHighlightSpan() {
-        return minHighlightSpan <= maxHighlightSpan ? minHighlightSpan : maxHighlightSpan;
+        return Math.min(minHighlightSpan, maxHighlightSpan);
     }
 
     public void setMinHighlightSpan(int minHighlightSpan) {
         this.minHighlightSpan = minHighlightSpan;
+        preferences.putInt("minHighlightSpan", minHighlightSpan);
         annotateAll();
     }
 
     public int getMaxHighlightSpan() {
-        return maxHighlightSpan >= minHighlightSpan ? maxHighlightSpan : minHighlightSpan;
+        return Math.max(maxHighlightSpan, minHighlightSpan);
     }
 
     public void setMaxHighlightSpan(int maxHighlightSpan) {
-        if (maxHighlightSpan <= minHighlightSpan) {
-            return;
-        }
         this.maxHighlightSpan = maxHighlightSpan;
+        preferences.putInt("maxHighlightSpan", maxHighlightSpan);
         annotateAll();
     }
 
@@ -262,20 +272,26 @@ public abstract class BaseAnnotationUI {
             taggedDocuments.add(convertAnnotationsIntoTags(document, ann));
         }
         XMLUtils.saveXML(path, taggedDocuments);
-        new JOptionPane().showMessageDialog(null, "Saved to " + path);
+        JOptionPane.showMessageDialog(null, "Saved to " + path);
     }
 
     protected abstract String convertAnnotationsIntoTags(String document,
             List<Annotation> annotations);
 
-    public void setHighlighterColor(Color color) {
+    public void setHighlighterColor(String color) {
         painter.setColor(color);
+        preferences.put("color", color);
         annotateAll();
     }
 
     public void setFuzziness(int fuzz) {
         painter.setFuzziness(fuzz);
+        preferences.putInt("fuzziness", fuzz);
         annotateAll();
+    }
+
+    public int getFuzziness() {
+        return painter.getFuzziness();
     }
 
     private class DocumentUpdater implements DocumentListener {
