@@ -1,10 +1,11 @@
 package sociocom.fuzzyannotation.ui.annotation;
 
 import sociocom.fuzzyannotation.Annotation;
-import sociocom.fuzzyannotation.GradientHighlighter;
+import sociocom.fuzzyannotation.ui.GradientHighlighter;
 import sociocom.fuzzyannotation.utils.XMLUtils;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -55,6 +56,12 @@ public abstract class BaseAnnotationUI {
     protected Highlighter highlighter;
     protected GradientHighlighter painter;
     protected final Random random = new Random();
+    private int fuzzySpan = 10;
+    private int minHighlightSpan = 3;
+    private int maxHighlightSpan = 10;
+
+    // Options Panel
+    private JFrame optionsPanel;
 
     public BaseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations,
             String title) {
@@ -97,6 +104,16 @@ public abstract class BaseAnnotationUI {
         tempPanel.add(docNumInputField);
         tempPanel.add(new JLabel("of " + documents.size()));
         upperPanel.add(tempPanel);
+        tempPanel = new JPanel();
+        JButton optionsButton = new JButton("Options");
+        optionsButton.addActionListener(e -> {
+            if (optionsPanel != null) {
+                optionsPanel.dispose();
+            }
+            optionsPanel = new OptionsPanel(this);
+        });
+        tempPanel.add(optionsButton);
+        upperPanel.add(tempPanel);
 
         // Create Buttons
         nextButton = new JButton("Next");
@@ -131,7 +148,9 @@ public abstract class BaseAnnotationUI {
         frame.add(upperPanel, BorderLayout.PAGE_START);
         frame.add(textArea, BorderLayout.CENTER);
         frame.add(lowerPanel, BorderLayout.PAGE_END);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Select first document
         changeText(documentNumber);
@@ -179,7 +198,45 @@ public abstract class BaseAnnotationUI {
         }
     }
 
-    protected abstract void annotateAll();
+    public abstract void annotateAll();
+
+    public int getFuzzyWeight() {
+        return this.fuzzySpan;
+    }
+
+    public void setFuzzyWeight(int fuzzySpan) {
+        updateAnnotationSpan(fuzzySpan - this.fuzzySpan);
+        this.fuzzySpan = fuzzySpan;
+        annotateAll();
+    }
+
+    public int getMinHighlightSpan() {
+        return minHighlightSpan <= maxHighlightSpan ? minHighlightSpan : maxHighlightSpan;
+    }
+
+    public void setMinHighlightSpan(int minHighlightSpan) {
+        this.minHighlightSpan = minHighlightSpan;
+        annotateAll();
+    }
+
+    public int getMaxHighlightSpan() {
+        return maxHighlightSpan >= minHighlightSpan ? maxHighlightSpan : minHighlightSpan;
+    }
+
+    public void setMaxHighlightSpan(int maxHighlightSpan) {
+        if (maxHighlightSpan <= minHighlightSpan) {
+            return;
+        }
+        this.maxHighlightSpan = maxHighlightSpan;
+        annotateAll();
+    }
+
+    protected void updateAnnotationSpan(int offset) {
+        for (Annotation annotation : annotations) {
+            annotation.setSpan(annotation.getStartSpan() - offset,
+                    annotation.getEndSpan() + offset);
+        }
+    }
 
     private void saveAction(ActionEvent e) {
         JFileChooser jfc = new JFileChooser(
@@ -210,6 +267,16 @@ public abstract class BaseAnnotationUI {
 
     protected abstract String convertAnnotationsIntoTags(String document,
             List<Annotation> annotations);
+
+    public void setHighlighterColor(Color color) {
+        painter.setColor(color);
+        annotateAll();
+    }
+
+    public void setFuzziness(int fuzz) {
+        painter.setFuzziness(fuzz);
+        annotateAll();
+    }
 
     private class DocumentUpdater implements DocumentListener {
 

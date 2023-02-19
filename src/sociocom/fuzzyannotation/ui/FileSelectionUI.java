@@ -39,6 +39,7 @@ public class FileSelectionUI {
         frame.add(panel, BorderLayout.NORTH);
         frame.add(button, BorderLayout.SOUTH);
         frame.setSize(200, 150);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 

@@ -1,7 +1,7 @@
 package sociocom.fuzzyannotation.ui.annotation;
 
 import sociocom.fuzzyannotation.Annotation;
-import sociocom.fuzzyannotation.GradientHighlighter;
+import sociocom.fuzzyannotation.ui.GradientHighlighter;
 
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
@@ -16,6 +16,7 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
 
     public PointWiseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
         super(documents, storedAnnotations, "Point-wise Annotation");
+        setFuzzyWeight(10);
     }
 
     @Override
@@ -28,14 +29,17 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
     }
 
     @Override
-    protected void annotateAll() {
+    public void annotateAll() {
         Highlighter highlighter = textArea.getHighlighter();
         highlighter.removeAllHighlights();
         try {
 
+            int highlightMinSpan = getMinHighlightSpan();
+            int highlightMaxSpan = getMaxHighlightSpan();
             for (Annotation a : annotations) {
                 if (a.getStartSpan() == -1 || a.getEndSpan() == -1) {
-                    int span = random.nextInt(10 - 3) + 3;
+                    int span =
+                            random.nextInt(highlightMaxSpan - highlightMinSpan) + highlightMinSpan;
                     int start = Math.max(0, a.start() - span);
                     int offseta = textArea.getText().substring(start, a.start())
                             .indexOf("\n");
@@ -54,10 +58,33 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
                             Math.min(a.start() + offsetb, textArea.getText().length() - 1));
                 }
 
-                highlighter.addHighlight(a.getStartSpan(), a.getEndSpan(), painter);
+                int start = a.getStartSpan();
+                int end = a.getEndSpan();
+                if ((end - start) < highlightMinSpan) {
+                    int offset = highlightMinSpan - (end - start);
+                    start = start - (int) Math.ceil(offset / 2);
+                    end = end + (int) Math.ceil(offset / 2);
+                }
+
+                if ((end - start) > highlightMaxSpan) {
+                    int offset = (end - start) - highlightMaxSpan;
+                    start = start + (int) Math.ceil(offset / 2);
+                    end = end - (int) Math.ceil(offset / 2);
+                }
+
+                highlighter.addHighlight(start, end, painter);
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    protected void updateAnnotationSpan(int offset) {
+        for (Annotation annotation : annotations) {
+            int startSpan = annotation.getStartSpan() - offset;
+            int endSpan = annotation.getEndSpan() + offset;
+            annotation.setSpan(startSpan, endSpan);
         }
     }
 

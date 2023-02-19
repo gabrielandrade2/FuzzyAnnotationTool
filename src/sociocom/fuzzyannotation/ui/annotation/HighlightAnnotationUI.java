@@ -1,16 +1,19 @@
 package sociocom.fuzzyannotation.ui.annotation;
 
 import sociocom.fuzzyannotation.Annotation;
-import sociocom.fuzzyannotation.GradientHighlighter;
+import sociocom.fuzzyannotation.ui.GradientHighlighter;
 
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
+
 
 public class HighlightAnnotationUI extends BaseAnnotationUI {
 
@@ -27,7 +30,7 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
     }
 
     @Override
-    protected void annotateAll() {
+    public void annotateAll() {
         Highlighter highlighter = textArea.getHighlighter();
         highlighter.removeAllHighlights();
         try {
@@ -56,7 +59,11 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
                 highlighter.addHighlight(a.getStartSpan(), a.getEndSpan(), painter);
             }
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            StringJoiner joiner = new StringJoiner("\n")
+                    .add("Failed to highlight text")
+                    .add("Message: " + ex.getMessage());
+            JOptionPane.showMessageDialog(frame, joiner.toString(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
