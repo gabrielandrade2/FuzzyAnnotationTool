@@ -102,9 +102,7 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
 
                 String tag = (String) tagComboBox.getSelectedItem();
                 Annotation annotation = new Annotation(start, end, tag);
-                annotations.add(annotation);
-                undoStack.push(annotation);
-                undoButton.setEnabled(true);
+                addAnnotation(annotation);
 
                 annotateAll();
             } else if (SwingUtilities.isRightMouseButton(e)) {

@@ -82,6 +82,11 @@ public class OptionsPanel extends JFrame {
             highlighterMaxSpanSlider.setEnabled(false);
         }
 
+        if (annotationUI instanceof PointWiseAnnotationUI) {
+            fuzzinessLabel.setEnabled(false);
+            fuzzinessSlider.setEnabled(false);
+        }
+
         JPanel centerPanel = new JPanel();
         GridLayout layout = new GridLayout(6, 2);
         centerPanel.setLayout(layout);

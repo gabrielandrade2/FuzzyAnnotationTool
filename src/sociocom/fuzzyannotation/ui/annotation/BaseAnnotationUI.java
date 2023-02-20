@@ -189,6 +189,10 @@ public abstract class BaseAnnotationUI {
             annotations.remove(annotation);
             annotateAll();
             undoButton.setEnabled(!undoStack.isEmpty());
+            // Hack to auto-save if there is only one document
+            if (autoSave) {
+                save(file.toString(), false);
+            }
         }
     }
 
@@ -288,6 +292,16 @@ public abstract class BaseAnnotationUI {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error while saving file", "Error",
                     JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    protected final void addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+        undoStack.push(annotation);
+        undoButton.setEnabled(true);
+        // Hack to auto-save if there is only one document
+        if (autoSave && documents.size() == 1) {
+            save(file.toString(), false);
         }
     }
 

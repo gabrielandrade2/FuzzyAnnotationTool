@@ -132,9 +132,7 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
             highlighter.removeAllHighlights();
 
             Annotation annotation = new Annotation(start, tag);
-            annotations.add(annotation);
-            undoStack.push(annotation);
-            undoButton.setEnabled(true);
+            PointWiseAnnotationUI.this.addAnnotation(annotation);
 
             annotateAll();
         }
