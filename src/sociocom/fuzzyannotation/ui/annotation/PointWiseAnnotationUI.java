@@ -6,6 +6,7 @@ import sociocom.fuzzyannotation.ui.GradientHighlighter;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
@@ -14,8 +15,9 @@ import javax.swing.text.Highlighter;
 
 public class PointWiseAnnotationUI extends BaseAnnotationUI {
 
-    public PointWiseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
-        super(documents, storedAnnotations, "Point-wise Annotation");
+    public PointWiseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations,
+            boolean autoSave, Path file) {
+        super(documents, storedAnnotations, autoSave, file, "Point-wise Annotation");
         setFuzzyWeight(10);
     }
 

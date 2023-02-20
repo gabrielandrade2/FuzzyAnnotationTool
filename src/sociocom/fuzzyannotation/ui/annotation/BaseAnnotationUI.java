@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,8 @@ public abstract class BaseAnnotationUI {
     protected final JButton undoButton;
     protected final JComboBox<String> tagComboBox;
     private final Preferences preferences;
+    private final boolean autoSave;
+    private final Path file;
 
     // Annotation data
     protected List<List<Annotation>> storedAnnotations;
@@ -70,9 +73,11 @@ public abstract class BaseAnnotationUI {
     private JFrame optionsPanel;
 
     public BaseAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations,
-            String title) {
+            boolean autoSave, Path file, String title) {
         this.documents = documents;
         this.storedAnnotations = storedAnnotations;
+        this.autoSave = autoSave;
+        this.file = file;
 
         preferences = Preferences.userRoot().node(this.getClass().getName());
 
@@ -143,7 +148,7 @@ public abstract class BaseAnnotationUI {
         tempPanel.add(nextButton);
         lowerPanel.add(tempPanel, BorderLayout.NORTH);
         tempPanel = new JPanel(new FlowLayout());
-        JButton save = new JButton("Save");
+        JButton save = new JButton("Export file");
         save.addActionListener(this::saveAction);
         tempPanel.add(save);
         lowerPanel.add(tempPanel, BorderLayout.SOUTH);
@@ -191,6 +196,11 @@ public abstract class BaseAnnotationUI {
         if (newDoc > documents.size() - 1 || newDoc < 0) {
             return;
         }
+
+        if (autoSave) {
+            save(file.toString(), false);
+        }
+
         documentNumber = newDoc;
         if (storedAnnotations.size() <= documentNumber ||
                 storedAnnotations.get(documentNumber) == null) {
@@ -259,20 +269,26 @@ public abstract class BaseAnnotationUI {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = jfc.getSelectedFile();
             System.out.println(selectedFile.getAbsolutePath());
-            save(selectedFile.getAbsolutePath(), documents, storedAnnotations);
+            save(selectedFile.getAbsolutePath(), true);
         }
     }
 
-    private void save(String path, List<String> documents,
-            List<List<Annotation>> annotations) {
+    private void save(String path, boolean showMessage) {
         List<String> taggedDocuments = new ArrayList<>();
         for (int i = 0; i < documents.size(); i++) {
             String document = documents.get(i);
-            List<Annotation> ann = annotations.get(i);
+            List<Annotation> ann = storedAnnotations.get(i);
             taggedDocuments.add(convertAnnotationsIntoTags(document, ann));
         }
-        XMLUtils.saveXML(path, taggedDocuments);
-        JOptionPane.showMessageDialog(null, "Saved to " + path);
+        try {
+            XMLUtils.saveXML(path, taggedDocuments);
+            if (showMessage) {
+                JOptionPane.showMessageDialog(null, "Saved to " + path);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error while saving file", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     protected abstract String convertAnnotationsIntoTags(String document,

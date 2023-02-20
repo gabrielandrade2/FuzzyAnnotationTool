@@ -6,6 +6,7 @@ import sociocom.fuzzyannotation.ui.GradientHighlighter;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -17,8 +18,9 @@ import javax.swing.text.Highlighter;
 
 public class HighlightAnnotationUI extends BaseAnnotationUI {
 
-    public HighlightAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations) {
-        super(documents, storedAnnotations, "Highlight Annotation");
+    public HighlightAnnotationUI(List<String> documents, List<List<Annotation>> storedAnnotations,
+            boolean autoSave, Path file) {
+        super(documents, storedAnnotations, autoSave, file, "Highlight Annotation");
     }
 
     @Override

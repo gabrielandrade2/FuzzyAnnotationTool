@@ -18,9 +18,9 @@ public class Main {
         new FileSelectionUI();
     }
 
-    public static void openWindow(WindowType type, Path file) {
+    public static void openWindow(WindowType type, Path file, boolean autoSave) {
         try {
-            loadDocument(type, file);
+            loadDocument(type, file, autoSave);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Failed to open file: " + file.toString() + "\n" +
                     e.getMessage());
@@ -28,17 +28,17 @@ public class Main {
         }
     }
 
-    private static void loadDocument(WindowType type, Path file) {
+    private static void loadDocument(WindowType type, Path file, boolean autoSave) {
         //Load documents
         List<String> documents = XMLUtils.readXML(file);
         List<List<Annotation>> storedAnnotations = convertTagsIntoAnnotations(documents);
         removeAnnotations(documents);
         switch (type) {
             case PointWiseAnnotationUI:
-                new PointWiseAnnotationUI(documents, storedAnnotations);
+                new PointWiseAnnotationUI(documents, storedAnnotations, autoSave, file);
                 break;
             case HighlightAnnotationUI:
-                new HighlightAnnotationUI(documents, storedAnnotations);
+                new HighlightAnnotationUI(documents, storedAnnotations, autoSave, file);
                 break;
 
         }

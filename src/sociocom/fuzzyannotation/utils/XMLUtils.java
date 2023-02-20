@@ -36,7 +36,7 @@ public class XMLUtils {
         }
     }
 
-    public static void saveXML(String path, List<String> documents) {
+    public static void saveXML(String path, List<String> documents) throws IOException {
         File file = new File(path);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -48,8 +48,6 @@ public class XMLUtils {
             }
             writer.write("</articles>\n");
             writer.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }

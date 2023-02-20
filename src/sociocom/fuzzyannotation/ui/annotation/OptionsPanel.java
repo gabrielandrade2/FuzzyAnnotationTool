@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 
 public class OptionsPanel extends JFrame {
@@ -24,6 +25,11 @@ public class OptionsPanel extends JFrame {
         super("Options");
         this.annotationUI = annotationUI;
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        setSize(new Dimension(400, 300));
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        mainPanel.setLayout(new BorderLayout());
 
         JLabel title = new JLabel("Options");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 18));
@@ -54,12 +60,11 @@ public class OptionsPanel extends JFrame {
                 annotationUI.getFuzziness());
         fuzzinessSlider.addChangeListener(this::setFuzziness);
 
-        setLayout(new BorderLayout());
         JPanel tempPanel = new JPanel();
         tempPanel.setLayout(new BorderLayout());
         tempPanel.add(title, BorderLayout.CENTER);
         tempPanel.add(new JLabel(" "), BorderLayout.SOUTH);
-        add(tempPanel, BorderLayout.NORTH);
+        mainPanel.add(tempPanel, BorderLayout.NORTH);
 
         JButton importPrefs = new JButton("Import Preferences");
         importPrefs.addActionListener(actionEvent -> {
@@ -78,7 +83,8 @@ public class OptionsPanel extends JFrame {
         }
 
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(6, 2));
+        GridLayout layout = new GridLayout(6, 2);
+        centerPanel.setLayout(layout);
         centerPanel.add(highlighterColorLabel);
         centerPanel.add(highlighterColorComboBox);
         centerPanel.add(fuzzinessLabel);
@@ -90,7 +96,7 @@ public class OptionsPanel extends JFrame {
         centerPanel.add(highlighterMaxSpanLabel);
         centerPanel.add(highlighterMaxSpanSlider);
 
-        add(centerPanel, BorderLayout.CENTER);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BorderLayout());
@@ -102,9 +108,9 @@ public class OptionsPanel extends JFrame {
         bottomPanel.add(close, BorderLayout.EAST);
         bottomPanel.add(importPrefs, BorderLayout.WEST);
         bottomPanel.add(exportPrefs, BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        setSize(new Dimension(400, 210));
+        add(mainPanel, BorderLayout.CENTER);
         setLocationRelativeTo(null);
         setVisible(true);
         setResizable(false);
