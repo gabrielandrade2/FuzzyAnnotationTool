@@ -12,6 +12,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 
@@ -29,6 +30,8 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
         painter = new GradientHighlighter(new Color(51, 153, 255, 128));
         textArea.setHighlighter(highlighter);
         textArea.addMouseListener(new MouseEventHandler());
+        DefaultCaret caret = new DefaultCaret();
+        textArea.setCaret(caret);
     }
 
     @Override
@@ -102,10 +105,21 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
 
     private class MouseEventHandler extends MouseAdapter {
 
+        public void mousePressed(MouseEvent e) {
+            if (e.getClickCount() > 1) {
+                e.consume();
+                textArea.getCaret().setDot(0);
+            }
+        }
+
         public void mouseReleased(MouseEvent e) {
             if (SwingUtilities.isLeftMouseButton(e)) {
                 int start = textArea.getSelectionStart();
                 int end = textArea.getSelectionEnd();
+
+                if (start == end) {
+                    return;
+                }
 
                 String tag = (String) tagComboBox.getSelectedItem();
                 Annotation annotation = new Annotation(start, end, tag);
