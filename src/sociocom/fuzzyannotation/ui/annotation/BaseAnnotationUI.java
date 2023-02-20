@@ -136,7 +136,7 @@ public abstract class BaseAnnotationUI {
         undoButton.addActionListener(e -> undo());
         undoButton.setEnabled(false);
 
-        prevButton = new JButton("Prev");
+        prevButton = new JButton("Previous");
         prevButton.setEnabled(false);
         prevButton.addActionListener(e -> changeText(documentNumber - 1));
 
