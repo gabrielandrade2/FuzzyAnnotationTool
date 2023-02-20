@@ -38,8 +38,7 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
         try {
             for (Annotation a : annotations) {
                 if (a.getStartSpan() == -1 || a.getEndSpan() == -1) {
-                    int span = random.nextInt(3);
-                    span = 0;
+                    int span = random.nextInt(getFuzzyWeight());
                     int start = Math.max(0, a.start() - span);
                     int offseta = textArea.getText().substring(start, a.start())
                             .indexOf("\n");
@@ -58,7 +57,15 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
                             Math.min(a.end() + span - offsetb, textArea.getText().length() - 1));
                 }
 
-                highlighter.addHighlight(a.getStartSpan(), a.getEndSpan(), painter);
+                int start = a.getStartSpan();
+                int end = a.getEndSpan();
+
+                if ((end - start) < 2) {
+                    int offset = 2 - (end - start);
+                    start = start - (int) Math.ceil(offset / 2);
+                    end = end + (int) Math.ceil(offset / 2);
+                }
+                highlighter.addHighlight(start, end, painter);
             }
         } catch (Exception ex) {
             StringJoiner joiner = new StringJoiner("\n")
