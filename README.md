@@ -4,19 +4,25 @@ This is a Java Swing based Fuzzy Annotation Tool, to be used in Named Entity ann
 
 In contrast to a "normal" annotation tool, this software does not enforce the concept of entity
 boundaries, but instead attempts to bias the annotation in thinking that just a rough marking of the
-concept is enough. The goal is to have annotations lose less time in attempting to mark of fix
+concept is enough.
+
+The goal is to have annotations lose less time in attempting to mark of fix
 entity span to be on the exact entity boundaries (which can be hard to define), thus increasing
 annotation speed.
 
-The created annotations are presented to the user as highlights with smooth transitions, as shown in
-the figure:
-
-![Example annotation](images/Annotation_Example.png)
+Created annotations are presented to the user as highlights with smooth transitions.
 
 # Operation modes
 
 This software has support for two different types of annotation process, which generate different
 annotation outputs when exported.
+
+## Point-wise annotation
+
+In this mode, annotators must click a point in the text, preferably in the middle of an entity, to
+create an annotation for that position. In this mode, the entity span is not relevant.
+
+![Point-wise annotation](images/point.gif)
 
 ## Highlight annotation
 
@@ -24,10 +30,7 @@ Similar to more usual annotation tools, in this mode annotators have to highligh
 an annotation. The entity boundaries do not need to be exactly marked as the highlighted annotation
 will have a similar size that the highlighted span.
 
-## Point-wise annotation
-
-In this mode, annotators must click a point in the text, preferably in the middle of an entity, to
-create an annotation for that position. In this mode, the entity span is not relevant.
+![Highlight annotation](images/highlight.gif)
 
 # Usage
 
