@@ -67,7 +67,7 @@ public abstract class BaseAnnotationUI {
     protected final Random random = new Random();
     private int fuzzyWeight = 10;
     private int minHighlightSpan = 3;
-    private int maxHighlightSpan = 10;
+    private int maxHighlightSpan = 15;
 
     // Options Panel
     private JFrame optionsPanel;
