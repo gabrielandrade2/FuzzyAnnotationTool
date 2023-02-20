@@ -2,6 +2,8 @@
 
 This is a Java Swing based Fuzzy Annotation Tool, to be used in Named Entity annotation process.
 
+The latest version can be downloaded from [here](https://github.com/gabrielandrade2/FuzzyAnnotationTool/releases/).
+
 In contrast to a "normal" annotation tool, this software does not enforce the concept of entity
 boundaries, but instead attempts to bias the annotation in thinking that just a rough marking of the
 concept is enough.
