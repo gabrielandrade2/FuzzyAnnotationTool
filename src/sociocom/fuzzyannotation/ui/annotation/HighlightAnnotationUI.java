@@ -126,6 +126,7 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
                 addAnnotation(annotation);
 
                 annotateAll();
+                textArea.getCaret().setDot(0);
             } else if (SwingUtilities.isRightMouseButton(e)) {
             }
         }

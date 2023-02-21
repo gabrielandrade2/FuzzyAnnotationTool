@@ -1,9 +1,9 @@
 package sociocom.fuzzyannotation.utils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class XMLUtils {
     public static List<String> readXML(Path path) {
         try {
             List<String> documents = new ArrayList<>();
-            List<String> lines = Files.readAllLines(path);
+            List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
             for (int i = 0; i < lines.size(); i++) {
                 if (lines.get(i).matches("^<article( [^>]*)?>$")) {
                     StringJoiner sj = new StringJoiner("\n");
@@ -37,17 +37,17 @@ public class XMLUtils {
     }
 
     public static void saveXML(String path, List<String> documents) throws IOException {
-        File file = new File(path);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            writer.write("<articles>\n");
+        try (OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(path),
+                StandardCharsets.UTF_8)) {
+            os.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            os.write("<articles>\n");
             for (String document : documents) {
-                writer.write("<article>\n");
-                writer.write(document);
-                writer.write("\n</article>\n");
+                os.write("<article>\n");
+                os.write(document);
+                os.write("\n</article>\n");
             }
-            writer.write("</articles>\n");
-            writer.flush();
+            os.write("</articles>\n");
+            os.flush();
         }
     }
 }

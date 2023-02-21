@@ -14,6 +14,29 @@ annotation speed.
 
 Created annotations are presented to the user as highlights with smooth transitions.
 
+# Installation
+
+The tool is provided as a single .jar or .exe file to be directly executed. There is no need for
+installation or initial configuration.
+
+However, ***Java 8** is required to run the tool*, which can be downloaded
+from [here](https://www.java.com/download).
+
+#### A basic step-by-step guide to run the tool:
+
+1. Download Java 8 from [here](https://www.java.com/download) and install it in your computer
+   following the setup instructions.
+2. Download the latest version of the tool
+   from [here](https://github.com/gabrielandrade2/FuzzyAnnotationTool/releases/).
+3. Run the .jar or .exe file.
+
+**NOTE:** Windows may complain about a security warning when trying to run the .exe file, with a
+message "Windows protected your PC". This is because the .exe file is not signed.
+
+To run the file anyway, click on "More info" and then on "Run anyway".
+
+If it is not possible to run the .exe file, the .jar file can be used instead.
+
 # Operation modes
 
 This software has support for two different types of annotation process, which generate different
@@ -36,10 +59,7 @@ will have a similar size that the highlighted span.
 
 # Usage
 
-The tool is provided as a single .jar or .exe file to be directly executed. There is no need for
-installation or initial configuration.
-
-*Java 17 is required to run the tool.* Can be downloaded from [here](https://www.java.com/download).
+This section describes the usage of the software and meaning of each screen element.
 
 **NOTE:** User preferences are stored in the OS's registry system. Therefore, they are automatically
 detected and applied independently of where the executable file is located.
@@ -118,6 +138,8 @@ the [Annotation Screen](#Annotation-Screen).
    possible to be highlighted for an annotation.
 5. `Maximium Highlight Size`*(Only for point-wise annotation)*: Defines the largest span length
    possible to be highlighted for an annotation.
+6. `Font Type`: Changes the font type used in the annotation screen.
+7. `Font Size`: Changes the font size used in the annotation screen.
 
 # Files
 

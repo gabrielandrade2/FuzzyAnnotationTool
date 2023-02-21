@@ -30,9 +30,9 @@ public class FileSelectionUI {
 
     private final JFrame frame;
     private final JButton openButton;
+    private final JTextField fileNameField;
+    private final JCheckBox autoSaveCheckBox;
     private ButtonGroup buttonGroup;
-    private JTextField fileNameField;
-    private JCheckBox autoSaveCheckBox;
 
     public FileSelectionUI() {
         frame = new JFrame("File Selection");

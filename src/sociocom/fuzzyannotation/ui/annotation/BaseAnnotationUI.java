@@ -1,14 +1,18 @@
 package sociocom.fuzzyannotation.ui.annotation;
 
 import sociocom.fuzzyannotation.Annotation;
+import sociocom.fuzzyannotation.Main;
 import sociocom.fuzzyannotation.ui.GradientHighlighter;
 import sociocom.fuzzyannotation.utils.XMLUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -24,6 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
@@ -36,6 +41,20 @@ import javax.swing.text.NumberFormatter;
 public abstract class BaseAnnotationUI {
 
     private static final String[] tagOptions = {"C"};
+    private static final Font FONT;
+    private static final int DEFAULT_FONT_SIZE = 14;
+
+    static {
+        try {
+            FONT = Font.createFont(Font.TRUETYPE_FONT, Main.class.getClassLoader()
+                            .getResourceAsStream("fonts/YuGothM.ttc"))
+                    .deriveFont(Font.PLAIN, DEFAULT_FONT_SIZE);
+        } catch (FontFormatException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     // UI elements
     protected final JFrame frame;
@@ -79,7 +98,7 @@ public abstract class BaseAnnotationUI {
         this.autoSave = autoSave;
         this.file = file;
 
-        preferences = Preferences.userRoot().node(this.getClass().getName());
+        preferences = Preferences.userRoot();
 
         // Create UI
         frame = new JFrame(title);
@@ -91,6 +110,11 @@ public abstract class BaseAnnotationUI {
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(false);
         textArea.getDocument().addDocumentListener(new DocumentUpdater());
+        String fontType = preferences.get("fontType", null);
+        Font font = fontType == null ? FONT : new Font(fontType, Font.PLAIN, DEFAULT_FONT_SIZE);
+        textArea.setFont(font);
+        setFontSize(preferences.getFloat("fontSize", DEFAULT_FONT_SIZE));
+        JScrollPane scrollPane = new JScrollPane(textArea);
 
         // Create Upper panel
         JPanel upperPanel = new JPanel();
@@ -159,7 +183,7 @@ public abstract class BaseAnnotationUI {
         frame.setSize(1000, 600);
         frame.setLayout(new BorderLayout());
         frame.add(upperPanel, BorderLayout.PAGE_START);
-        frame.add(textArea, BorderLayout.CENTER);
+        frame.add(scrollPane, BorderLayout.CENTER);
         frame.add(lowerPanel, BorderLayout.PAGE_END);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -170,6 +194,11 @@ public abstract class BaseAnnotationUI {
 
         // Select first document
         changeText(documentNumber);
+    }
+
+    public void setFontSize(float fontSize) {
+        textArea.setFont(textArea.getFont().deriveFont(fontSize));
+        preferences.putFloat("fontSize", fontSize);
     }
 
     // Override this method to configure UI elements
@@ -189,8 +218,8 @@ public abstract class BaseAnnotationUI {
             annotations.remove(annotation);
             annotateAll();
             undoButton.setEnabled(!undoStack.isEmpty());
-            // Hack to auto-save if there is only one document
-            if (autoSave) {
+            // FIXME: Hack to auto-save if there is only one document or last document
+            if (autoSave && (documents.size() == 1 || documentNumber == documents.size() - 1)) {
                 save(file.toString(), false);
             }
         }
@@ -255,6 +284,46 @@ public abstract class BaseAnnotationUI {
         annotateAll();
     }
 
+
+    public void setHighlighterColor(String color) {
+        painter.setColor(color);
+        preferences.put("color", color);
+        annotateAll();
+    }
+
+    public void setFuzziness(int fuzz) {
+        painter.setFuzziness(fuzz);
+        preferences.putInt("fuzziness", fuzz);
+        annotateAll();
+    }
+
+    public int getFuzziness() {
+        return painter.getFuzziness();
+    }
+
+    public int getFontSize() {
+        return textArea.getFont().getSize();
+    }
+
+    public String getFontType() {
+        return textArea.getFont().getFontName();
+    }
+
+    public void setFontType(String fontType) {
+        try {
+            if (fontType == null) {
+                textArea.setFont(FONT.deriveFont(Font.PLAIN, textArea.getFont().getSize()));
+                preferences.remove("fontType");
+            } else {
+                textArea.setFont(new Font(fontType, Font.PLAIN, textArea.getFont().getSize()));
+                preferences.put("fontType", fontType);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Font not found", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     protected void updateAnnotationSpan(int offset) {
         for (Annotation annotation : annotations) {
             annotation.setSpan(annotation.getStartSpan() - offset,
@@ -299,8 +368,8 @@ public abstract class BaseAnnotationUI {
         annotations.add(annotation);
         undoStack.push(annotation);
         undoButton.setEnabled(true);
-        // Hack to auto-save if there is only one document
-        if (autoSave && documents.size() == 1) {
+        // FIXME: Hack to auto-save if there is only one document or last document
+        if (autoSave && (documents.size() == 1 || documentNumber == documents.size() - 1)) {
             save(file.toString(), false);
         }
     }
@@ -308,21 +377,6 @@ public abstract class BaseAnnotationUI {
     protected abstract String convertAnnotationsIntoTags(String document,
             List<Annotation> annotations);
 
-    public void setHighlighterColor(String color) {
-        painter.setColor(color);
-        preferences.put("color", color);
-        annotateAll();
-    }
-
-    public void setFuzziness(int fuzz) {
-        painter.setFuzziness(fuzz);
-        preferences.putInt("fuzziness", fuzz);
-        annotateAll();
-    }
-
-    public int getFuzziness() {
-        return painter.getFuzziness();
-    }
 
     private class DocumentUpdater implements DocumentListener {
 

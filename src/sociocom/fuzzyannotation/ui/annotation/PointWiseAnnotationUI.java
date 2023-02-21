@@ -25,6 +25,7 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
     protected void configureElements() {
         textArea.setSelectionColor(null);
         textArea.addMouseListener(new MouseEventHandler());
+        textArea.getCaret().setSelectionVisible(false);
         highlighter = new DefaultHighlighter();
         painter = new GradientHighlighter(new Color(51, 153, 255, 128));
         textArea.setHighlighter(highlighter);

@@ -6,10 +6,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.JTextComponent;
@@ -30,8 +30,7 @@ public class GradientHighlighter extends DefaultHighlighter.DefaultHighlightPain
         COLORSMAP.put("Purple", new Color(153, 51, 255, 128));
     }
 
-    public static final List<String> COLORS = COLORSMAP.keySet().stream()
-            .collect(Collectors.toList());
+    public static final List<String> COLORS = new ArrayList<>(COLORSMAP.keySet());
 
     private Color color;
     private int fuzziness = 0;
