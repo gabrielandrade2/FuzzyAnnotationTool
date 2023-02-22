@@ -43,6 +43,8 @@ public class FileSelectionUI {
         JLabel title = new JLabel("Fuzzy Annotation Tool");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 20f));
         titlePanel.add(title);
+        JLabel version = new JLabel("v0.2");
+        titlePanel.add(version);
 
         JPanel panel = new JPanel();
         FlowLayout layout = new FlowLayout();

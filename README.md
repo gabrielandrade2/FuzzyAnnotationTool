@@ -19,18 +19,31 @@ Created annotations are presented to the user as highlights with smooth transiti
 The tool is provided as a single .jar or .exe file to be directly executed. There is no need for
 installation or initial configuration.
 
-However, ***Java 8** is required to run the tool*, which can be downloaded
+***Java 8** is required to run the tool*, which can be downloaded
 from [here](https://www.java.com/download).
+However, a complete *zip* package is provided in the latest release, which includes the Java runtime
+for Windows PCs.
 
-#### A basic step-by-step guide to run the tool:
+#### A basic step-by-step guide to run the tool
+
+For the complete zip version:
+
+1. Download the latest zip package (`FuzzyAnnotationTool_full.zip`) of the tool
+   from [here](https://github.com/gabrielandrade2/FuzzyAnnotationTool/releases/).
+2. Extract the zip file to a folder of your choice.
+3. Run the `FuzzyAnnotationTool.exe` file.
+
+For the individual .jar file:
 
 1. Download Java 8 from [here](https://www.java.com/download) and install it in your computer
    following the setup instructions.
 2. Download the latest version of the tool
    from [here](https://github.com/gabrielandrade2/FuzzyAnnotationTool/releases/).
-3. Run the .jar or .exe file.
+3. Run the `FuzzyAnnotationTool.jar` file.
 
-**NOTE:** Windows may complain about a security warning when trying to run the .exe file, with a
+### IMPORTANT NOTE:
+
+Windows may complain about a security warning when trying to run the .exe file, with a
 message "Windows protected your PC". This is because the .exe file is not signed.
 
 To run the file anyway, click on "More info" and then on "Run anyway".
