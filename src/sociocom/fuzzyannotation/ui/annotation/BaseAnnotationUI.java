@@ -7,13 +7,14 @@ import sociocom.fuzzyannotation.utils.XMLUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,6 @@ import java.util.Stack;
 import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,7 +33,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.Highlighter;
 import javax.swing.text.NumberFormatter;
@@ -332,18 +331,16 @@ public abstract class BaseAnnotationUI {
     }
 
     private void saveAction(ActionEvent e) {
-        JFileChooser jfc = new JFileChooser(
-                FileSystemView.getFileSystemView().getHomeDirectory());
-        jfc.setDialogTitle("Specify a file to save");
-        jfc.setSelectedFile(new File("annotation.xml"));
-        jfc.setAcceptAllFileFilterUsed(false);
-        jfc.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));
-        int returnValue = jfc.showSaveDialog(frame);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = jfc.getSelectedFile();
-            System.out.println(selectedFile.getAbsolutePath());
-            save(selectedFile.getAbsolutePath(), true);
+        FileDialog fd = new FileDialog(frame, "Specify a file to save", FileDialog.SAVE);
+        fd.setDirectory(FileSystemView.getFileSystemView().getHomeDirectory().toString());
+        fd.setFile("annotation.xml");
+        fd.setVisible(true);
+        String directory = fd.getDirectory();
+        String file = fd.getFile();
+        if (directory == null || file == null) {
+            return;
         }
+        save(Paths.get(directory).resolve(file).toAbsolutePath().toString(), true);
     }
 
     private void save(String path, boolean showMessage) {

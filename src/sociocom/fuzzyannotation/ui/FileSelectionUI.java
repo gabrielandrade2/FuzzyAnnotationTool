@@ -5,16 +5,17 @@ import sociocom.fuzzyannotation.WindowType;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -22,8 +23,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
 public class FileSelectionUI {
@@ -43,7 +42,7 @@ public class FileSelectionUI {
         JLabel title = new JLabel("Fuzzy Annotation Tool");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 20f));
         titlePanel.add(title);
-        JLabel version = new JLabel("v0.2");
+        JLabel version = new JLabel("v0.2.1");
         titlePanel.add(version);
 
         JPanel panel = new JPanel();
@@ -135,20 +134,18 @@ public class FileSelectionUI {
         Main.openWindow(WindowType.valueOf(command), file, autoSaveCheckBox.isSelected());
     }
 
-    private static Path fileChooser() {
-        JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-        FileFilter filter = new FileNameExtensionFilter("Text files", "txt", "xml");
-        jfc.addChoosableFileFilter(filter);
-        jfc.setFileFilter(filter);
-        jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        jfc.setAcceptAllFileFilterUsed(false);
-        int returnValue = jfc.showOpenDialog(null);
-
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = jfc.getSelectedFile();
-            System.out.println(selectedFile.getAbsolutePath());
-            return selectedFile.toPath();
+    private Path fileChooser() {
+        FileDialog fd = new FileDialog(frame, "Choose a file", FileDialog.LOAD);
+        fd.setDirectory(FileSystemView.getFileSystemView().getHomeDirectory().toString());
+        fd.setFile("*.xml;*.txt");
+        fd.setFilenameFilter(
+                (File dir, String name) -> name.endsWith(".xml") || name.endsWith(".txt"));
+        fd.setVisible(true);
+        String directory = fd.getDirectory();
+        String file = fd.getFile();
+        if (directory == null || file == null) {
+            return null;
         }
-        return null;
+        return Paths.get(directory).resolve(file);
     }
 }
