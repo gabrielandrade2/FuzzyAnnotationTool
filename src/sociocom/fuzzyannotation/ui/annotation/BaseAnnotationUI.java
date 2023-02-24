@@ -246,6 +246,7 @@ public abstract class BaseAnnotationUI {
 
         annotateAll();
 
+        textArea.setCaretPosition(0);
         prevButton.setEnabled(documentNumber != 0);
         nextButton.setEnabled(documentNumber != documents.size() - 1);
     }

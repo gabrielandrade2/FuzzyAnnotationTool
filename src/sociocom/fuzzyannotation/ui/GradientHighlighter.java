@@ -118,14 +118,16 @@ public class GradientHighlighter extends DefaultHighlighter.DefaultHighlightPain
                 if (offs1 >= c.getText().length() - 1 ||
                         c.getFontMetrics(c.getFont()).charWidth(c.getText().charAt(offs1 + 1)) +
                                 r.x +
-                                r.width > c.getWidth()) {
+                                r.width > c.getWidth() ||
+                        c.getText().charAt(offs1 + 1) == '\n' ||
+                        c.getText().charAt(offs1) == '\n') {
                     gradient = new GradientPaint(r.x, r.y, transparent, r.x + r.width, r.y,
                             color, false);
 
-                } else if (
+                } else if (offs0 == 0 ||
                         r.x - c.getFontMetrics(c.getFont())
-                                .charWidth(c.getText().charAt(offs0 - 1)) <
-                                0) {
+                                .charWidth(c.getText().charAt(offs0 - 1)) < 0 ||
+                        c.getText().charAt(offs0 - 1) == '\n') {
                     gradient = new GradientPaint(r.x, r.y, color, r.x + r.width, r.y,
                             transparent, false);
                 } else {

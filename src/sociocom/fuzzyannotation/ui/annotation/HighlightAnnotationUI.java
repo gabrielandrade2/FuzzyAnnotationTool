@@ -81,26 +81,38 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
 
     @Override
     protected String convertAnnotationsIntoTags(String text, List<Annotation> annotations) {
-        if (annotations == null || annotations.isEmpty()) {
+        try {
+            if (annotations == null || annotations.isEmpty()) {
+                return text;
+            }
+
+            String taggedText = new String(text);
+            List<Annotation> sortedAnnotations = annotations.stream().sorted()
+                    .collect(Collectors.toList());
+            int offset = 0;
+            for (Annotation a : sortedAnnotations) {
+                String startTag = "<" + a.tag() + ">";
+                String endTag = "</" + a.tag() + ">";
+                StringBuilder sb = new StringBuilder();
+                sb.append(taggedText.substring(0, a.start() + offset));
+                sb.append(startTag);
+                if (a.end() + offset >= text.length()) {
+                    sb.append(text.substring(a.start() + offset));
+                } else {
+                    sb.append(text.substring(a.start() + offset, a.end() + offset));
+                }
+                sb.append(endTag);
+                sb.append(taggedText.substring(a.end() + offset));
+                offset += startTag.length() + endTag.length();
+                taggedText = sb.toString();
+            }
+            return taggedText;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Failed to save file: \n" + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
             return text;
         }
-
-        String taggedText = new String(text);
-        List<Annotation> sortedAnnotations = annotations.stream().sorted()
-                .collect(Collectors.toList());
-        int offset = 0;
-        for (Annotation a : sortedAnnotations) {
-            String startTag = "<" + a.tag() + ">";
-            String endTag = "</" + a.tag() + ">";
-            StringBuilder sb = new StringBuilder();
-            sb.append(taggedText.substring(0, a.start() + offset));
-            sb.append(startTag);
-            sb.append(text.substring(a.start() + offset, a.end() + offset));
-            sb.append(endTag);
-            sb.append(taggedText.substring(a.end() + offset));
-            offset += startTag.length() + endTag.length();
-        }
-        return taggedText;
     }
 
     private class MouseEventHandler extends MouseAdapter {
@@ -108,7 +120,6 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
         public void mousePressed(MouseEvent e) {
             if (e.getClickCount() > 1) {
                 e.consume();
-                textArea.getCaret().setDot(0);
             }
         }
 
@@ -126,7 +137,6 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
                 addAnnotation(annotation);
 
                 annotateAll();
-                textArea.getCaret().setDot(0);
             } else if (SwingUtilities.isRightMouseButton(e)) {
             }
         }
