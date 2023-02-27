@@ -83,7 +83,7 @@ public abstract class BaseAnnotationUI {
 
     protected GradientHighlighter painter;
     protected final Random random = new Random();
-    private int fuzzyWeight = 5;
+    private int fuzzyWeight = 2;
     private int minHighlightSpan = 3;
     private int maxHighlightSpan = 15;
 
