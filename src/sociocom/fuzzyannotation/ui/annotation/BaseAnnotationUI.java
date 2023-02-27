@@ -217,8 +217,7 @@ public abstract class BaseAnnotationUI {
             annotations.remove(annotation);
             annotateAll();
             undoButton.setEnabled(!undoStack.isEmpty());
-            // FIXME: Hack to auto-save if there is only one document or last document
-            if (autoSave && (documents.size() == 1 || documentNumber == documents.size() - 1)) {
+            if (autoSave) {
                 save(file.toString(), false);
             }
         }
@@ -366,8 +365,7 @@ public abstract class BaseAnnotationUI {
         annotations.add(annotation);
         undoStack.push(annotation);
         undoButton.setEnabled(true);
-        // FIXME: Hack to auto-save if there is only one document or last document
-        if (autoSave && (documents.size() == 1 || documentNumber == documents.size() - 1)) {
+        if (autoSave) {
             save(file.toString(), false);
         }
     }

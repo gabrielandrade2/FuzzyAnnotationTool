@@ -7,7 +7,10 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultHighlighter;
@@ -149,5 +152,21 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
                 }
             }
         }
+    }
+
+    public static List<List<Annotation>> convertTagsIntoAnnotations(List<String> documents) {
+        List<List<Annotation>> annotations = new ArrayList<>();
+        for (String document : documents) {
+            List<Annotation> ann = new ArrayList<>();
+            Pattern pattern = Pattern.compile("<([^>]+) />");
+            Matcher matcher = pattern.matcher(document);
+            int offset = 0;
+            while (matcher.find()) {
+                ann.add(new Annotation(matcher.start() - offset, matcher.group(1)));
+                offset += matcher.group(1).length() + 4;
+            }
+            annotations.add(ann);
+        }
+        return annotations;
     }
 }

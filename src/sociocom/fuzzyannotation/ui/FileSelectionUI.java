@@ -69,7 +69,7 @@ public class FileSelectionUI {
         openButton.addActionListener(this::openFile);
         openButton.setEnabled(false);
         autoSaveCheckBox = new JCheckBox(
-                "Auto Save? (Saves annotations automatically when switching documents)");
+                "Auto Save? (Saves annotations automatically)");
         autoSaveCheckBox.setSelected(true);
         lowerPanel.add(autoSaveCheckBox);
         lowerPanel.add(openButton);

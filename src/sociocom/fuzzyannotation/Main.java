@@ -6,10 +6,7 @@ import sociocom.fuzzyannotation.ui.annotation.PointWiseAnnotationUI;
 import sociocom.fuzzyannotation.utils.XMLUtils;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -35,33 +32,19 @@ public class Main {
     private static void loadDocument(WindowType type, Path file, boolean autoSave) {
         //Load documents
         List<String> documents = XMLUtils.readXML(file);
-        List<List<Annotation>> storedAnnotations = convertTagsIntoAnnotations(documents);
-        removeAnnotations(documents);
+        List<List<Annotation>> storedAnnotations;
         switch (type) {
             case PointWiseAnnotationUI:
+                storedAnnotations = PointWiseAnnotationUI.convertTagsIntoAnnotations(documents);
+                removeAnnotations(documents);
                 new PointWiseAnnotationUI(documents, storedAnnotations, autoSave, file);
                 break;
             case HighlightAnnotationUI:
+                storedAnnotations = HighlightAnnotationUI.convertTagsIntoAnnotations(documents);
+                removeAnnotations(documents);
                 new HighlightAnnotationUI(documents, storedAnnotations, autoSave, file);
                 break;
-
         }
-    }
-
-    private static List<List<Annotation>> convertTagsIntoAnnotations(List<String> documents) {
-        List<List<Annotation>> annotations = new ArrayList<>();
-        for (String document : documents) {
-            List<Annotation> ann = new ArrayList<>();
-            Pattern pattern = Pattern.compile("<([^>]+) />");
-            Matcher matcher = pattern.matcher(document);
-            int offset = 0;
-            while (matcher.find()) {
-                ann.add(new Annotation(matcher.start() - offset, matcher.group(1)));
-                offset += matcher.group(1).length() + 4;
-            }
-            annotations.add(ann);
-        }
-        return annotations;
     }
 
     private static void removeAnnotations(List<String> documents) {
