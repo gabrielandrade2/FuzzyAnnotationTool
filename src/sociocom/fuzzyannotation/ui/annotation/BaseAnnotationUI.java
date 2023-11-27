@@ -211,7 +211,7 @@ public abstract class BaseAnnotationUI {
         painter.setColor(preferences.get("color", "Blue"));
     }
 
-    private void undo() {
+    protected void undo() {
         if (!undoStack.isEmpty()) {
             Annotation annotation = undoStack.pop();
             annotations.remove(annotation);

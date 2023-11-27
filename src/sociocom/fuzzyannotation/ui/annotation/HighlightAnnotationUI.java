@@ -27,6 +27,11 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
         super(documents, storedAnnotations, autoSave, file, "Highlight Annotation");
     }
 
+    private void resetSelection() {
+        textArea.setSelectionStart(0);
+        textArea.setSelectionEnd(0);
+    }
+
     @Override
     protected void configureElements() {
         highlighter = new DefaultHighlighter();
@@ -81,6 +86,12 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
             JOptionPane.showMessageDialog(frame, joiner.toString(), "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    @Override
+    protected void undo() {
+        super.undo();
+        resetSelection();
     }
 
     @Override
@@ -141,6 +152,7 @@ public class HighlightAnnotationUI extends BaseAnnotationUI {
                 addAnnotation(annotation);
 
                 annotateAll();
+                resetSelection();
             } else if (SwingUtilities.isRightMouseButton(e)) {
             }
         }
