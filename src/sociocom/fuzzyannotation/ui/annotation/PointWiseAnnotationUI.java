@@ -78,6 +78,14 @@ public class PointWiseAnnotationUI extends BaseAnnotationUI {
                     end = end - (int) Math.ceil(offset / 2);
                 }
 
+                // Sanity check
+                if (start < 0) {
+                    start = 0;
+                }
+                if (end > textArea.getText().length() - 1) {
+                    end = textArea.getText().length() - 1;
+                }
+
                 highlighter.addHighlight(start, end, painter);
             }
         } catch (Exception ex) {

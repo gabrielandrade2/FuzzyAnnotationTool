@@ -21,12 +21,12 @@ public class XMLUtils {
             List<String> documents = new ArrayList<>();
             List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
             for (int i = 0; i < lines.size(); i++) {
-                if (lines.get(i).matches("^<article( [^>]*)?>$")) {
+                if (lines.get(i).trim().matches("^<article( [^>]*)?>$")) {
                     StringJoiner sj = new StringJoiner("\n");
-                    while (!lines.get(++i).equals("</article>")) {
+                    while (!lines.get(++i).trim().equals("</article>")) {
                         sj.add(lines.get(i));
                     }
-                    documents.add(sj.toString());
+                    documents.add(sj.toString().trim());
                 }
             }
             return documents;

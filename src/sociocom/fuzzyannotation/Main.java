@@ -32,6 +32,13 @@ public class Main {
     private static void loadDocument(WindowType type, Path file, boolean autoSave) {
         //Load documents
         List<String> documents = XMLUtils.readXML(file);
+
+        if (documents.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No documents found in file: " + file.toString());
+            new FileSelectionUI();
+            return;
+        }
+
         List<List<Annotation>> storedAnnotations;
         switch (type) {
             case PointWiseAnnotationUI:
